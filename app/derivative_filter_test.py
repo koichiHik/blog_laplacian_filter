@@ -15,7 +15,8 @@ def derivative_filter():
     band_width = 16
     peak = 255
     org_img = np.zeros((height, width), dtype=np.uint8)
-    org_img[:, int(width / 2 - band_width / 2):int(width / 2 + band_width / 2 + 1)] = peak
+    org_img[:, int(width / 2 - band_width / 2)
+                   :int(width / 2 + band_width / 2 + 1)] = peak
 
     # Prepare figure.
     fig = plt.figure(figsize=(10, 12))
@@ -189,39 +190,6 @@ def filter_sample_image():
     cv2.waitKey(0)
 
 
-def filter_himawari_pics():
-
-    cur_dir = os.path.dirname(os.path.abspath(__file__))
-    path = cur_dir + '/../data/himawari.jpg'
-    img = cv2.imread(path)
-    #img = cv2.resize(cv2.imread(path), None, fx=0.5, fy=0.5)
-    #img = cv2.GaussianBlur(img, ksize=(7, 7), sigmaX=0.5)
-    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    sigma = 15.0
-    gauss_kernel = cv2.getGaussianKernel(300, sigma, cv2.CV_32F)
-    gauss_filter = np.outer(gauss_kernel, gauss_kernel.transpose())
-    filtered = cv2.filter2D(gray_img, cv2.CV_32FC1, gauss_filter)
-
-    deriv_2nd_kernel = np.array(
-        [[0.0, 1.0, 0.0], [1.0, -4.0, 1.0], [0.0, 1.0, 0.0]], dtype=np.float)
-    gray_img_2nd = cv2.filter2D(
-        filtered, cv2.CV_32FC1, deriv_2nd_kernel) * sigma * sigma
-    min_val, max_val, _, _ = cv2.minMaxLoc(gray_img_2nd)
-    gray_img_2nd = -gray_img_2nd
-
-    _, gray_img_2nd = cv2.threshold(
-        gray_img_2nd, 10.0, 0.0, cv2.THRESH_TOZERO)
-
-    print(min_val)
-    print(max_val)
-
-    gray_img_2nd = np.uint8(gray_img_2nd)
-
-    cv2.imshow("Laplacian Responce", gray_img_2nd)
-    cv2.waitKey(0)
-
-
 if __name__ == "__main__":
 
     filter_sample_image()
@@ -233,5 +201,3 @@ if __name__ == "__main__":
 
     derivative_filter_with_gaussian(
         band=16, init_sigma=2.0, k=2, normalize=False)
-
-    # filter_himawari_pics()
